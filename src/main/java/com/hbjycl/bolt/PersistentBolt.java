@@ -38,19 +38,27 @@ public class PersistentBolt {
                                         .withTableName("userinfo") 
                                         .withQueryTimeoutSecs(50);*/
         //使用schemaColumns，可以指定字段要插入的字段  
-        List<Column> schemaColumns = Lists.newArrayList(new Column("user_id", Types.VARCHAR),
-                new Column("resource_id", Types.VARCHAR), new Column("count", Types.INTEGER));
+        List<Column> schemaColumns = Lists.newArrayList(new Column("content", Types.VARCHAR));
         JdbcMapper simpleJdbcMapper = new SimpleJdbcMapper(schemaColumns);
         JdbcInsertBolt jdbcInsertBolt = new JdbcInsertBolt(connectionProvider, simpleJdbcMapper)
-                .withInsertQuery("insert into userinfo(id,user_id,resource_id,count) values(?,?,?)")
+                .withInsertQuery("insert into log(content) values(?)")
                 .withQueryTimeoutSecs(50);
         return jdbcInsertBolt;
     }
 
-    public static JdbcLookupBolt getJdbcLookupBlot() {
+    public static JdbcLookupBolt getJdbcLookupBlot(String[] fileds,List<Column> queryParamColumns,String selectSql) {
 
+        Fields outputFields = new Fields(fileds);
+       // String  = "select id from userinfo where user_id = ?";
+        SimpleJdbcLookupMapper lookupMapper = new SimpleJdbcLookupMapper(outputFields, queryParamColumns);
+        JdbcLookupBolt userNameLookupBolt = new JdbcLookupBolt(connectionProvider, selectSql, lookupMapper)
+                .withQueryTimeoutSecs(30);
+        return userNameLookupBolt;
+    }
 
-        Fields outputFields = new Fields("id");
+    public static JdbcLookupBolt getLogJdbcLookupBlot() {
+
+        Fields outputFields = new Fields("content");
         List<Column> queryParamColumns = Lists.newArrayList(new Column("user_id", Types.VARCHAR));
         String selectSql = "select id from userinfo where user_id = ?";
         SimpleJdbcLookupMapper lookupMapper = new SimpleJdbcLookupMapper(outputFields, queryParamColumns);

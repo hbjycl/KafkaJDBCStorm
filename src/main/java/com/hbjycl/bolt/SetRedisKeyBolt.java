@@ -8,18 +8,18 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
 /**
- * Created by Admin on 2016/7/26.
+ * Created by Admin on 2016/7/27.
  */
-public class AfterBolt extends BaseBasicBolt {
+public class SetRedisKeyBolt extends BaseBasicBolt {
     @Override
     public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
-        //String word = (String) tuple.getValue(0);
-        System.out.println("id：" + tuple.getValue(0));
-        basicOutputCollector.emit(new Values(tuple.getValue(0)));
+        String key = "logs";
+        String value = tuple.getStringByField("content");
+        basicOutputCollector.emit(new Values(key,value));
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("message"));
+        outputFieldsDeclarer.declare(new Fields("key","content"));
     }
 }
