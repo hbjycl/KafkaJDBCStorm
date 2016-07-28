@@ -17,6 +17,7 @@ public class StormKafkaTopo {
         BrokerHosts hosts = new ZkHosts("h1:2181,h2:2181,h3:2181");
         SpoutConfig spoutConfig = new SpoutConfig(hosts, "jdbctopic", "/storm", UUID.randomUUID().toString());
         spoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        spoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
         KafkaSpout kafkaSpout = new KafkaSpout(spoutConfig);
         builder.setSpout("spout", kafkaSpout, 5);
 
