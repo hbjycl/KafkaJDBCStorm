@@ -1,9 +1,12 @@
 
 import com.hbjycl.bolt.BeforeBolt;
 import com.hbjycl.bolt.PersistentBolt;
+import com.hbjycl.redis.KafkaLogMapper;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.kafka.*;
+import org.apache.storm.redis.bolt.RedisStoreBolt;
+import org.apache.storm.redis.common.config.JedisPoolConfig;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
@@ -20,8 +23,13 @@ public class StormKafkaTopo {
         spoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
         KafkaSpout kafkaSpout = new KafkaSpout(spoutConfig);
         builder.setSpout("spout", kafkaSpout, 5);
-
         builder.setBolt("beforebolt", new BeforeBolt(),1).shuffleGrouping("spout");
+
+        JedisPoolConfig poolConfig = new JedisPoolConfig.Builder().
+                setHost("h1").setPassword("123456").build();
+        RedisStoreBolt storeBolt = new RedisStoreBolt(poolConfig,new KafkaLogMapper());
+
+        builder.setBolt("redisbolt",storeBolt,2).shuffleGrouping("beforebolt");
 
         builder.setBolt("jdbcbolt", PersistentBolt.getJdbcInsertBolt(),2).shuffleGrouping("beforebolt");
 
