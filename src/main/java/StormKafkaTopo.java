@@ -1,4 +1,5 @@
 
+import com.hbjycl.app.MyProperties;
 import com.hbjycl.bolt.BeforeBolt;
 import com.hbjycl.bolt.PersistentBolt;
 import com.hbjycl.redis.KafkaLogMapper;
@@ -26,7 +27,7 @@ public class StormKafkaTopo {
         builder.setBolt("beforebolt", new BeforeBolt(),1).shuffleGrouping("spout");
 
         JedisPoolConfig poolConfig = new JedisPoolConfig.Builder().
-                setHost("h1").setPassword("123456").build();
+                setHost(MyProperties.REDIS_HOST).setPassword(MyProperties.REDIS_PASS).build();
         RedisStoreBolt storeBolt = new RedisStoreBolt(poolConfig,new KafkaLogMapper());
 
         builder.setBolt("redisbolt",storeBolt,2).shuffleGrouping("beforebolt");
