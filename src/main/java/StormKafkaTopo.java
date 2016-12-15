@@ -16,12 +16,6 @@ public class StormKafkaTopo {
 
         builder.setBolt("wufengBolt", new WufengBeforeBolt(),2).shuffleGrouping("wufengSpout");
 
-
-/*        JedisPoolConfig poolConfig = new JedisPoolConfig.Builder().
-                setHost(MyProperties.REDIS_HOST).setPassword(MyProperties.REDIS_PASS).setTimeout(1000000).build();
-        RedisStoreBolt storeBolt = new RedisStoreBolt(poolConfig,new KafkaLogMapper());
-        builder.setBolt("redisbolt",storeBolt,2).shuffleGrouping("beforeBolt");*/
-
         builder.setBolt("wufengJdbcBolt", WufengJdbcBolt.getJdbcInsertBolt(),2).shuffleGrouping("wufengBolt");
 
         Config config = new Config();
